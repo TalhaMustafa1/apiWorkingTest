@@ -25,15 +25,20 @@
 
 
     <script>
+// Improved variable names
+const originalTextArea = document.getElementById("originalText");
+const submitButton = document.getElementById("submitButton");
+const paraphrasedTextArea = document.getElementById("paraphrasedText");
+
 submitButton.addEventListener("click", async () => {
-    const originalText = document.getElementById("originalText").value.trim();
+    const originalText = originalTextArea.value.trim();
     if (!originalText) {
         alert("Please enter some text.");
         return;
     }
 
     const requestBody = {
-        original_text: originalText, // Ensure original_text field is included
+        original_text: originalText,
         synonym_percentage: 30,
         mode: "standard"
     };
@@ -58,7 +63,7 @@ submitButton.addEventListener("click", async () => {
             throw new Error("Paraphrased text not found in response.");
         }
 
-        document.getElementById("paraPharasedText").value = paraphrasedText;
+        paraphrasedTextArea.value = paraphrasedText;
     } catch (error) {
         console.error("Error fetching paraphrased text:", error);
         alert("An error occurred while fetching paraphrased text. Please try again later.");
