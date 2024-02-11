@@ -9,68 +9,62 @@
 <body>
     <div class="main-part">
         <textarea id="originalText" name="w3review" rows="4" cols="50">
-            At w3schools.com you will learn how to make a website. They offer free tutorials in all web development technologies.
-            </textarea>
-            <br>
+            
+        </textarea>
+        <br>
         <button type="submit" id="submitButton">Submit</button>
     </div>
-<br><br>
+    <br><br>
     <div class="main-part">
-        <textarea id="paraPharasedText" name="w3review" rows="4" cols="50">
+        <textarea id="paraphrasedText" name="w3review" rows="4" cols="50">
             
-            </textarea>
+        </textarea>
     </div>
 
-
-
-
     <script>
-// Improved variable names
-const originalTextArea = document.getElementById("originalText");
-const submitButton = document.getElementById("submitButton");
-const paraphrasedTextArea = document.getElementById("paraphrasedText");
+        const originalTextArea = document.getElementById("originalText");
+        const submitButton = document.getElementById("submitButton");
+        const paraphrasedTextArea = document.getElementById("paraphrasedText");
 
-submitButton.addEventListener("click", async () => {
-    const originalText = originalTextArea.value.trim();
-    if (!originalText) {
-        alert("Please enter some text.");
-        return;
-    }
+        submitButton.addEventListener("click", async () => {
+            const originalText = originalTextArea.value.trim();
+            if (!originalText) {
+                alert("Please enter some text.");
+                return;
+            }
 
-    const requestBody = {
-        original_text: originalText,
-        synonym_percentage: 30,
-        mode: "standard"
-    };
+            const requestBody = {
+                original_text: originalText,
+                synonym_percentage: 30,
+                mode: "standard"
+            };
 
-    try {
-        const response = await fetch("https://par.aihumanize.com/rewrite/", {
-            method: "POST",
-            headers: {
-                "Accept": "application/json",
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(requestBody)
+            try {
+                const response = await fetch("https://par.aihumanize.com/rewrite/", {
+                    method: "POST",
+                    headers: {
+                        "Accept": "application/json",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch paraphrased text (${response.status} ${response.statusText}).`);
+                }
+
+                const responseData = await response.json();
+                const paraphrasedText = responseData.paraphrased_text;
+                if (!paraphrasedText) {
+                    throw new Error("Paraphrased text not found in response.");
+                }
+
+                paraphrasedTextArea.value = paraphrasedText;
+            } catch (error) {
+                console.error("Error fetching paraphrased text:", error);
+                alert("An error occurred while fetching paraphrased text. Please try again later.");
+            }
         });
-
-        if (!response.ok) {
-            throw new Error(`Failed to fetch paraphrased text (${response.status} ${response.statusText}).`);
-        }
-
-        const responseData = await response.json();
-        const paraphrasedText = responseData.paraphrased_text;
-        if (!paraphrasedText) {
-            throw new Error("Paraphrased text not found in response.");
-        }
-
-        paraphrasedTextArea.value = paraphrasedText;
-    } catch (error) {
-        console.error("Error fetching paraphrased text:", error);
-        alert("An error occurred while fetching paraphrased text. Please try again later.");
-    }
-});
-
     </script>
 </body>
-
 </html>
