@@ -3,67 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paraphraser</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Async Function Example</title>
 </head>
 <body>
-    <div class="main-part">
-        <textarea id="originalText" name="w3review" rows="4" cols="50">
-            
-        </textarea>
-        <br>
-        <button type="submit" id="submitButton">Submit</button>
-    </div>
-    <br><br>
-    <div class="main-part">
-        <textarea id="paraphrasedText" name="w3review" rows="4" cols="50">
-            
-        </textarea>
-    </div>
+    <h1>Async Function Example</h1>
+
+    <label for="txtarea">Enter Original Text:</label>
+    <input type="text" id="txtarea">
+    <br>
+    <label for="range">Enter Synonym Percentage:</label>
+    <input type="range" id="range" min="0" max="100" value="30">
+    <br>
+    <label for="rangeValue">Synonym Percentage Value:</label>
+    <span id="rangeValue">30</span>
+    <br>
+    <button onclick="paraphraseText()">Submit</button>
+    <br>
+    <label for="paraphraseTextResult">Paraphrased Text:</label>
+    <div id="paraphraseTextResult"></div>
 
     <script>
-        const originalTextArea = document.getElementById("originalText");
-        const submitButton = document.getElementById("submitButton");
-        const paraphrasedTextArea = document.getElementById("paraphrasedText");
-
-        submitButton.addEventListener("click", async () => {
-            const originalText = originalTextArea.value.trim();
-            if (!originalText) {
-                alert("Please enter some text.");
-                return;
-            }
-
-            const requestBody = {
-                original_text: originalText,
-                synonym_percentage: 30,
-                mode: "standard"
+        async function rewriteText(txtarea, range, mode) {
+            const url = 'https://par.aihumanize.com/rewrite/'; // Update with your actual endpoint URL
+            const requestData = {
+                original_text: txtarea,
+                synonym_percentage: range,
+                mode: mode
             };
 
             try {
-                const response = await fetch("https://par.aihumanize.com/rewrite/", {
-                    method: "POST",
+                const response = await fetch(url, {
+                    method: 'POST', // Specify the method
                     headers: {
-                        "Accept": "application/json",
-                        "Content-Type": "application/json"
+                        'Content-Type': 'application/json' // Specify the content type
                     },
-                    body: JSON.stringify(requestBody)
+                    body: JSON.stringify(requestData) // Convert the JavaScript object to a JSON string
                 });
 
                 if (!response.ok) {
-                    throw new Error(`Failed to fetch paraphrased text (${response.status} ${response.statusText}).`);
+                    throw new Error(`HTTP error! Status: ${response.status}`);
                 }
 
-                const responseData = await response.json();
-                const paraphrasedText = responseData.paraphrased_text;
-                if (!paraphrasedText) {
-                    throw new Error("Paraphrased text not found in response.");
-                }
-
-                paraphrasedTextArea.value = paraphrasedText;
+                const data = await response.json(); // Parse the JSON response body
+                return data; // This will be the paraphrased text result or any other data you return from your endpoint
             } catch (error) {
-                console.error("Error fetching paraphrased text:", error);
-                alert("An error occurred while fetching paraphrased text. Please try again later.");
+                console.error('Error fetching data: ', error);
             }
+        }
+
+        async function paraphraseText() {
+            const txtarea = document.getElementById("txtarea").value;
+            const range = parseInt(document.getElementById("range").value);
+            const paraphraseTextResultElement = document.getElementById("paraphraseTextResult");
+
+            try {
+                const data = await rewriteText(txtarea, range, "standard");
+                // Filter out the original words that have been replaced
+                const paraphraseTextResult = data
+                    .filter(item => item.status === "added" || item.status === "unchanged")
+                    .map(item => {
+                        if (item.status === "added") {
+                            return `<span style="color: red;">${item.text}</span>`;
+                        } else {
+                            return item.text;
+                        }
+                    })
+                    .join(" ");
+                // Update the paraphrased text field with the result
+                paraphraseTextResultElement.innerHTML = paraphraseTextResult;
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        // Listen for input event on the range input element
+        document.getElementById("range").addEventListener("input", function() {
+            // Update the displayed synonym percentage value
+            
+            // Call paraphraseText function to update the paraphrased text
+            paraphraseText();
         });
     </script>
 </body>
